@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "duncafker",
+  "version": "${version}",
+  "name": "DuncAFKer",
+  "description": "Allows you to afk click with a keybind, but locks all player movement.",
+  "authors": [
+    "DuncanRuns"
+  ],
+  "contributors": [],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/duncafker/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "me.duncanruns.duncafker.DuncAFKer"
+    ],
+    "modmenu": [
+      "me.duncanruns.duncafker.ModMenuImpl"
+    ]
+  },
+  "mixins": [
+    "duncafker.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.12.9",
+    "fabric": "*"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "duncafker.enabled": "AFK Clicking Lock Enabled",
+  "duncafker.disabled": "AFK Clicking Lock Disabled",
+  "duncafker.configtitle": "DuncAFKer Config",
+  "duncafker.key": "Toggle Clicker",
+  "duncafker.keybindcat": "DuncAFKer",
+  "duncafker.clickmode": "Click Mode: %s",
+  "duncafker.clickinterval": "Interval (Ticks): %s"
+}

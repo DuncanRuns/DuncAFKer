@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "package": "me.duncanruns.duncafker.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "EntityMixin",
+    "KeyboardInputMixin",
+    "MinecraftClientAccess",
+    "MinecraftClientMixin",
+    "PlayerInventoryMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

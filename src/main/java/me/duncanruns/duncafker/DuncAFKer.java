@@ -22,13 +22,11 @@ import java.nio.file.Path;
 
 public class DuncAFKer implements ModInitializer {
 
-    public static Logger LOGGER = LogManager.getLogger();
-
     public static final String MOD_ID = "duncafker";
     public static final String MOD_NAME = "DuncAFKer";
     private static final Path CONFIG_PATH = Path.of("config", MOD_ID);
     private static final File CONFIG_FILE = new File(CONFIG_PATH.toFile(), "options.txt");
-
+    public static Logger LOGGER = LogManager.getLogger();
     private static KeyBinding keyBinding;
     private static boolean afkLock = false;
     private static boolean wasPressed = false;
@@ -38,6 +36,42 @@ public class DuncAFKer implements ModInitializer {
     private static boolean doUse = false;
 
     private static boolean lockClicksToo = true;
+
+    public static void saveOptions() throws Exception {
+        if (!Files.isDirectory(CONFIG_PATH)) {
+            Files.createDirectories(CONFIG_PATH);
+        }
+        DuncAFKerOptionsJson options = new DuncAFKerOptionsJson();
+        options.doUse = doUse;
+        options.interval = interval;
+        Gson gson = new Gson();
+        String out = gson.toJson(options);
+        Files.writeString(CONFIG_FILE.toPath(), out);
+    }
+
+    public static void setUseInstead(boolean doUse) {
+        DuncAFKer.doUse = doUse;
+    }
+
+    public static int getInterval() {
+        return interval;
+    }
+
+    public static void setInterval(int interval) {
+        DuncAFKer.interval = interval;
+    }
+
+    public static boolean shouldUseInstead() {
+        return doUse;
+    }
+
+    public static boolean shouldPreventInputs() {
+        return afkLock;
+    }
+
+    public static boolean shouldPreventClickActions() {
+        return afkLock && lockClicksToo;
+    }
 
     @Override
     public void onInitialize() {
@@ -71,8 +105,7 @@ public class DuncAFKer implements ModInitializer {
 
         // Tick Events
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            MinecraftClient client = MinecraftClient.getInstance();
-            tick(client);
+            tick(MinecraftClient.getInstance());
         });
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!client.isIntegratedServerRunning()) {
@@ -81,38 +114,8 @@ public class DuncAFKer implements ModInitializer {
         });
     }
 
-    private static void tick(MinecraftClient client) {
-        if (afkLock) {
-            if (client.player == null) {
-                afkLock = false;
-                return;
-            }
-            ticker++;
-            while (ticker >= interval) {
-                ticker = 0;
-                lockClicksToo = false;
-                if (doUse) {
-                    ((MinecraftClientAccess) client).invokeDoItemUse();
-                } else {
-                    ((MinecraftClientAccess) client).setAttackCooldown(0);
-                    ((MinecraftClientAccess) client).invokeDoAttack();
-                }
-                lockClicksToo = true;
-            }
-        }
-
-    }
-
-    public static void saveOptions() throws Exception {
-        if (!Files.isDirectory(CONFIG_PATH)) {
-            Files.createDirectories(CONFIG_PATH);
-        }
-        DuncAFKerOptionsJson options = new DuncAFKerOptionsJson();
-        options.doUse = doUse;
-        options.interval = interval;
-        Gson gson = new Gson();
-        String out = gson.toJson(options);
-        Files.writeString(CONFIG_FILE.toPath(), out);
+    public static void log(Level level, String message) {
+        LOGGER.log(level, "[" + MOD_NAME + "] " + message);
     }
 
     private static void loadOptions() throws Exception {
@@ -126,31 +129,31 @@ public class DuncAFKer implements ModInitializer {
         }
     }
 
-    public static void log(Level level, String message) {
-        LOGGER.log(level, "[" + MOD_NAME + "] " + message);
-    }
+    private static void tick(MinecraftClient client) {
+        if (afkLock) {
+            if (client.player == null) {
+                afkLock = false;
+                return;
+            }
+            ticker++;
+            while (ticker >= interval) {
+                ticker = 0;
+                lockClicksToo = false;
+                if (doUse) {
+                    try {
+                        ((MinecraftClientAccess) client).invokeDoItemUse();
+                    } catch (Exception ignored) {
+                    }
+                } else {
+                    try {
+                        ((MinecraftClientAccess) client).setAttackCooldown(0);
+                        ((MinecraftClientAccess) client).invokeDoAttack();
+                    } catch (Exception ignored) {
+                    }
+                }
+                lockClicksToo = true;
+            }
+        }
 
-    public static void setInterval(int interval) {
-        DuncAFKer.interval = interval;
-    }
-
-    public static void setUseInstead(boolean doUse) {
-        DuncAFKer.doUse = doUse;
-    }
-
-    public static int getInterval() {
-        return interval;
-    }
-
-    public static boolean shouldUseInstead() {
-        return doUse;
-    }
-
-    public static boolean shouldPreventInputs() {
-        return afkLock;
-    }
-
-    public static boolean shouldPreventClickActions() {
-        return afkLock && lockClicksToo;
     }
 }

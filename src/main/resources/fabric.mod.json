@@ -22,9 +22,5 @@
   },
   "mixins": [
     "duncafker.mixins.json"
-  ],
-  "depends": {
-    "fabricloader": ">=0.12.9",
-    "fabric": "*"
-  }
+  ]
 }

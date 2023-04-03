@@ -13,7 +13,7 @@ public class ClickIntervalSliderWidget extends SliderWidget {
 
     @Override
     protected void updateMessage() {
-        setMessage(MutableText.of(new TranslatableTextContent("duncafker.clickinterval", "" + DuncAFKer.getInterval())));
+        setMessage(Text.translatable("duncafker.clickinterval", "" + DuncAFKer.getInterval()));
     }
 
     @Override

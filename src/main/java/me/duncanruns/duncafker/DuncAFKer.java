@@ -10,6 +10,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableTextContent;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -95,9 +96,9 @@ public class DuncAFKer implements ModInitializer {
                 afkLock = !afkLock;
                 ticker = 0;
                 if (afkLock) {
-                    client.player.sendMessage(MutableText.of(new TranslatableTextContent("duncafker.enabled")), true);
+                    client.player.sendMessage(Text.translatable("duncafker.enabled"), true);
                 } else {
-                    client.player.sendMessage(MutableText.of(new TranslatableTextContent("duncafker.disabled")), true);
+                    client.player.sendMessage(Text.translatable("duncafker.disabled"), true);
                 }
             }
             wasPressed = keyBinding.isPressed();

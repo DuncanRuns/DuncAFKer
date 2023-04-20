@@ -12,7 +12,7 @@ public abstract class PlayerInventoryMixin {
 
     @Inject(method = "scrollInHotbar", at = @At("HEAD"), cancellable = true)
     private void scrollMixin(double scrollAmount, CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs()) {
+        if (DuncAFKer.shouldPreventInteraction()) {
             info.cancel();
         }
     }

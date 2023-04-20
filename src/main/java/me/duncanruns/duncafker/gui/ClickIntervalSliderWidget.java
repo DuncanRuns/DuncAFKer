@@ -2,9 +2,7 @@ package me.duncanruns.duncafker.gui;
 
 import me.duncanruns.duncafker.DuncAFKer;
 import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 
 public class ClickIntervalSliderWidget extends SliderWidget {
     public ClickIntervalSliderWidget(int x, int y, int width, int height, Text text) {

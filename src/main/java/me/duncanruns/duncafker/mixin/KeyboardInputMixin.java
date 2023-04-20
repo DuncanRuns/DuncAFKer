@@ -13,7 +13,7 @@ public abstract class KeyboardInputMixin extends Input {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     private void preventControls(boolean slowDown, float f, CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs()) {
+        if (DuncAFKer.shouldPreventMovement()) {
             this.pressingForward = false;
             this.pressingBack = false;
             this.pressingLeft = false;

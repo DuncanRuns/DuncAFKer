@@ -13,7 +13,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "changeLookDirection", at = @At("HEAD"), cancellable = true)
     private void changeLookDirectionStartMixin(double cursorDeltaX, double cursorDeltaY, CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs() && ((Object) this) instanceof ClientPlayerEntity) {
+        if (DuncAFKer.shouldPreventMovement() && ((Object) this) instanceof ClientPlayerEntity) {
             info.cancel();
         }
     }

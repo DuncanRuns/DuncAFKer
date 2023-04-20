@@ -9,17 +9,18 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableTextContent;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.Supplier;
 
 public class DuncAFKer implements ModInitializer {
 
@@ -31,6 +32,9 @@ public class DuncAFKer implements ModInitializer {
     private static KeyBinding keyBinding;
     private static boolean afkLock = false;
     private static boolean wasPressed = false;
+
+    private static boolean usingFreecam = false;
+    private static Supplier<Boolean> checkFCMovementSupplier = null;
 
     private static int ticker = 0;
     private static int interval = 30;
@@ -66,53 +70,19 @@ public class DuncAFKer implements ModInitializer {
         return doUse;
     }
 
-    public static boolean shouldPreventInputs() {
+    public static boolean shouldPreventInteraction() {
+        return afkLock;
+    }
+
+    public static boolean shouldPreventMovement() {
+        if (usingFreecam && checkFCMovementSupplier.get()) {
+            return false;
+        }
         return afkLock;
     }
 
     public static boolean shouldPreventClickActions() {
         return afkLock && lockClicksToo;
-    }
-
-    @Override
-    public void onInitialize() {
-        log(Level.INFO, "Initializing");
-        try {
-            loadOptions();
-        } catch (Exception e) {
-            log(Level.ERROR, "Exception while loading options:");
-            e.printStackTrace();
-        }
-
-        keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "duncafker.key",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_UNKNOWN,
-                "duncafker.keybindcat"
-        ));
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (keyBinding.isPressed() && !wasPressed) {
-                afkLock = !afkLock;
-                ticker = 0;
-                if (afkLock) {
-                    client.player.sendMessage(Text.translatable("duncafker.enabled"), true);
-                } else {
-                    client.player.sendMessage(Text.translatable("duncafker.disabled"), true);
-                }
-            }
-            wasPressed = keyBinding.isPressed();
-        });
-
-        // Tick Events
-        ServerTickEvents.END_SERVER_TICK.register(server -> {
-            tick(MinecraftClient.getInstance());
-        });
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!client.isIntegratedServerRunning()) {
-                tick(client);
-            }
-        });
     }
 
     public static void log(Level level, String message) {
@@ -156,5 +126,65 @@ public class DuncAFKer implements ModInitializer {
             }
         }
 
+    }
+
+    private static void checkForFreecamMod() {
+        try {
+            Class<?> freecamClazz = Class.forName("net.xolt.freecam.Freecam");
+            Method m1 = freecamClazz.getMethod("isEnabled");
+            Method m2 = freecamClazz.getMethod("isPlayerControlEnabled");
+            usingFreecam = true;
+            checkFCMovementSupplier = () -> {
+                try {
+                    return ((Boolean) m1.invoke(null)) && !((Boolean) m2.invoke(null));
+                } catch (IllegalAccessException | InvocationTargetException ignored) {
+                    return false;
+                }
+            };
+        } catch (ClassNotFoundException | NoSuchMethodException ignored) {
+        }
+    }
+
+    @Override
+    public void onInitialize() {
+        log(Level.INFO, "Initializing");
+        try {
+            loadOptions();
+        } catch (Exception e) {
+            log(Level.ERROR, "Exception while loading options:");
+            e.printStackTrace();
+        }
+
+        checkForFreecamMod();
+
+        keyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "duncafker.key",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_UNKNOWN,
+                "duncafker.keybindcat"
+        ));
+
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (keyBinding.isPressed() && !wasPressed) {
+                afkLock = !afkLock;
+                ticker = 0;
+                if (afkLock) {
+                    client.player.sendMessage(Text.translatable("duncafker.enabled"), true);
+                } else {
+                    client.player.sendMessage(Text.translatable("duncafker.disabled"), true);
+                }
+            }
+            wasPressed = keyBinding.isPressed();
+        });
+
+        // Tick Events
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            tick(MinecraftClient.getInstance());
+        });
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if (!client.isIntegratedServerRunning()) {
+                tick(client);
+            }
+        });
     }
 }

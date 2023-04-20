@@ -39,14 +39,14 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "doItemPick", at = @At("HEAD"), cancellable = true)
     private void preventPick(CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs()) {
+        if (DuncAFKer.shouldPreventInteraction()) {
             info.cancel();
         }
     }
 
     @Inject(method = "handleBlockBreaking", at = @At("HEAD"), cancellable = true)
     private void preventBreaking(boolean bl, CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs()) {
+        if (DuncAFKer.shouldPreventInteraction()) {
             interactionManager.cancelBlockBreaking();
             info.cancel();
         }
@@ -54,7 +54,7 @@ public abstract class MinecraftClientMixin {
 
     @Inject(method = "handleInputEvents", at = @At("HEAD"))
     private void preventHotbar(CallbackInfo info) {
-        if (DuncAFKer.shouldPreventInputs()) {
+        if (DuncAFKer.shouldPreventInteraction()) {
             for (int i = 0; i < 9; i++) {
                 while (options.hotbarKeys[i].wasPressed()) {
                 }
